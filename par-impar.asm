@@ -1,5 +1,4 @@
 .data
-   
    vet:    .word 1,2,3,4,5,6,7,8,9,10
    par:    .space 400
    impar:  .space 400
@@ -15,7 +14,6 @@
 .globl main
 
  main:
-  
   #carregamento do size
   lw $t0, size
   
@@ -30,7 +28,6 @@
   la $s2, impar   #ponteiro para o inicio do vetor impar 
   
  loop:
-  
   #condição de parada
    beq $t1, $t0, fim  
    
@@ -46,7 +43,6 @@
   j eh_impar
    
  eh_par:
- 
   sw $t4, 0($s1)           #salva no vetor par
   addi $s1, $s1, 4         #avança o ponteiro par 
   addi $t2, $t2, 1         #incrementa o contador de par 
@@ -54,7 +50,6 @@
   j loop
    
  eh_impar:
- 
   sw $t4, 0($s2)          #salva no vetor impar 
   addi $s2, $s2, 4        #avança o ponteiro impar 
   addi $t3, $t3, 1        #incrementa o contador impar
@@ -62,7 +57,6 @@
   j loop
   
 fim:
-
 # ----------- IMPRIME ORIGINAL -----------
     li $v0,4
     la $a0,msgVet
