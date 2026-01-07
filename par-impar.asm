@@ -1,3 +1,9 @@
+#########################################################################################
+# Autor: 	Yasmin Moreira Soares
+# Data: 	07/01/2026
+# Descrição: 	Percorre um vetor, separa os números pares e ímpares em vetores distintos
+#########################################################################################
+
 .data
    vet:    .word 1,2,3,4,5,6,7,8,9,10
    par:    .space 400
