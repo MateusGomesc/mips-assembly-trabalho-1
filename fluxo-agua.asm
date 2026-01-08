@@ -1,3 +1,9 @@
+#########################################################################################
+# Autor: 	Davi Gonçalves Cabeceira
+# Data: 	08/01/2026
+# Descrição: 	Implementa a matriz e o vetor dado pelo problema , realiza a multiplicação
+                matricial e faz o pós processamento.
+#########################################################################################
 
 
 
