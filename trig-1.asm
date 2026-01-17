@@ -12,11 +12,11 @@
 	const_dois:	.float	2.0
 	k_max:	.word	50
 	criterio_erro:	.float	1.0e-7
-	xs:	.float	0.0, 0.1, 0.5, 0.9, 1.1
-	esperadosAtan:	.float	0.0, 0.0996687, 0.4636476, 0.7328151, 0.8329813
-	esperadosAsen:	.float	0.0, 0.1001674, 0.5235988, 1.1197695, 0.0
-	esperadosAcos:	.float	1.5707963, 1.4706289, 1.0471976, 0.4510268, 0.0
-	size:	.word	5
+	xs:	.float	0.0, 0.1, 0.5, 0.9, 1.1, -1.1
+	esperadosAtan:	.float	0.0, 0.0996687, 0.4636476, 0.7328151, 0.8329813, -0.8329813
+	esperadosAsen:	.float	0.0, 0.1001674, 0.5235988, 1.1197695, 0.0, 0.0
+	esperadosAcos:	.float	1.5707963, 1.4706289, 1.0471976, 0.4510268, 0.0, 0.0
+	size:	.word	6
 	pi:	.float	3.1415927
 
 .text
@@ -153,6 +153,10 @@ atan:
 	# Zerando os registradores
 	mtc1 $0, $f0
 	mtc1 $0, $f1
+	abs.s $f13, $f12
+	l.s $f8, const_um # $f8 = 1.0
+	c.lt.s $f8, $f13 # Verifica se modulo de x e maior que 1
+	bc1t atanMaiores
 	add.s $f0, $f0, $f12 # $f0 = soma = x
 	add.s $f1, $f1, $f12 # $f1 = numerador = x
 	l.s $f2, const_um # $f2 = denominador = 1.0
@@ -174,6 +178,43 @@ loopAtan:
 	add.s $f0, $f0, $f6 # soma += novo termo
 	addi $t1, $t1, 1 # k++
 	j loopAtan
+atanMaiores:
+	# Inversão de x
+	div.s $f12, $f8, $f12 # $f12 = 1 / x
+	add.s $f0, $f0, $f12 # $f0 = soma = 1 / x
+	add.s $f1, $f1, $f12 # $f1 = numerador = 1 / x
+	l.s $f2, const_um # $f2 = denominador = 1.0
+	mul.s $f3, $f12, $f12
+	neg.s $f3, $f3 # $f3 = -(1/x)^2
+	l.s $f4, const_dois # $f4 = 2.0
+	l.s $f8, const_um # $f8 = 1.0
+	l.s $f5, criterio_erro # $f5 = 1.0e-7
+	la $t0, k_max
+	lw $t0, ($t0) # $t0 = 50
+	xor $t1, $t1, $t1 # $t0 = k = 0
+loopAtanMaiores:
+	mul.s $f1, $f1, $f3 # Somando as potencias no numerador
+	add.s $f2, $f2, $f4 # denominador += 2
+	div.s $f6, $f1, $f2 # $f6 = novo termo = numerador / denominador
+	abs.s $f7, $f6
+	c.lt.s $f7, $f5 # Verifica se novo termo atingiu criterio de aproximacao
+	bc1t atanMaioresFinal
+	beq $t0, $t1, atanMaioresFinal # Verifica se k chegou no limite
+	add.s $f0, $f0, $f6 # soma += novo termo
+	addi $t1, $t1, 1 # k++
+	j loopAtanMaiores
+atanMaioresFinal:
+	l.s $f9, pi # $f9 = pi
+	div.s $f9, $f9, $f4 # $f9 = pi / 2
+	mtc1 $zero, $f10 # $f10 = 0
+	c.lt.s 1, $f12, $f10 # Verifica se (1/x) e menor que 0, pois o sinal na inversao se mantem
+	bc1t 1, atanMaioresNegativoFinal
+	sub.s $f0, $f9, $f0 # $f0 = (pi / 2) - atan(1 / x)
+	j fimFunction
+atanMaioresNegativoFinal:
+	neg.s $f9, $f9 # $f9 = - (pi / 2)
+	sub.s $f0, $f9, $f0 # $f0 = -(pi / 2) - atan(1 / x)
+	j fimFunction
 
 # Recebe $f12 = x e retorna $f0 = asen(x)
 asen:
@@ -182,6 +223,7 @@ asen:
 	mtc1 $0, $f1
 	# Verificacao de dominio
 	l.s $f5, const_um # $f5 = 1.0
+	abs.s $f13, $f12
 	c.le.s $f12, $f5
 	bc1f fimFunction
 	neg.s $f18, $f5
