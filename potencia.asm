@@ -31,7 +31,7 @@
 .text 
 	
 	# $t0 recebe result
-	lw $t0, 1
+	li $t0, 1
 	
 	# imprime intro1
 	li $v0, 4
