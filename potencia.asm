@@ -30,30 +30,27 @@
 
 .text 
 	
-	# $t0 recebe result
+	# $t0 recebe o valor inicial de result
 	li $t0, 1
 	
-	# imprime intro1
 	li $v0, 4
 	la $a0, introLin
 	syscall
 	
-	# imprime base1
 	li $v0, 4	
 	la $a0, baseLin	
 	syscall		
 	
-	# recebe o valor do usuário e guarda em $t1
+	# recebe a base do usuário e guarda em $t1
 	li $v0, 5	
 	syscall		
 	move $t1, $v0	
 	
-	# imprime exp1
 	li $v0, 4	
 	la $a0, expLin
 	syscall		
 	
-	# recebe o valor e guarda em $t2
+	# recebe o expoente e guarda em $t2
 	li $v0, 5	
 	syscall
 	move $t2, $v0
@@ -62,7 +59,7 @@
 
 		ble $t2, $zero, returnLin # quando o expoente for igual a zero -> return
 		mul $t0, $t0, $t1 # result = result * base 
-		subi $t2, $t2, 1  # decrementa o expoente
+		subi $t2, $t2, 1  
 		j whileLin
 		
 	returnLin:
