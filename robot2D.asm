@@ -1,10 +1,10 @@
 #################################################################################
-# Autor: 	Leonardo Pereira da Silva
-# Data: 	15/01/2026
-# Descrição: 	Implementa o cálculo da cinemática inversa de um robô 2D (θ1, θ2)
-#		a partir das entradas Px, Py, L1 e L2
-#		 - Px e Py: coordenadas X e Y desejadas do end-effector
-#		 - L1 e L2: comprimentos do segmento do braço do robô
+# Autor:        Leonardo Pereira da Silva
+# Data:         30/01/2026
+# Descrição:    Implementa o cálculo da cinemática inversa de um robô 2D (θ1, θ2)
+#               a partir das entradas Px, Py, L1 e L2
+#                - Px e Py: coordenadas X e Y desejadas do end-effector
+#                - L1 e L2: comprimentos do segmento do braço do robô
 #################################################################################
 
 .data
@@ -18,17 +18,18 @@ msg6:   .asciiz "\nPonto Inalcaçável - Muito longe.\n - Tente Novamenrte - \n"
 msg7:   .asciiz "\nPonto Inalcaçável - Muito perto.\n - Tente Novamenrte - \n"
 msg8:   .asciiz "\n Cos(Teta2): "
 msg9:   .asciiz "\n Cos(Phi): "
-msg10:  .asciiz "\n Tan(Beta)/2: "
+msg10:  .asciiz "\n Tan(Beta/2): "
 msg12:  .asciiz "\n Phi [rad]: "
 msg13:  .asciiz "\n Beta [rad]: "
-msg14:  .asciiz "\n Teta1 [deg]: "
-msg15:  .asciiz "\n Teta2 [deg]: "
+msg14:  .asciiz "\n Teta1 [rad]: "
+msg15:  .asciiz "\n Teta2 [rad]: "
 
 fUm:    .float 1.0
 fZero:  .float 0.0
 fDois:  .float 2.0
 fPIDeg: .float 180.0
 pi:	.float	3.1415927
+infHex: .word 0x7F800000           # Positive Infinite Hex
 
 const_um:	.float	1.0
 const_dois:	.float	2.0
@@ -37,9 +38,9 @@ criterio_erro:	.float	1.0e-7
 
 .text
 main:
-   # Register Mapping:	L1: $f20,	L2: $f21,   	Px: $f22,   	Py: $f23,  
-   #			D: $f24,	Cos(θ2): $f25, 	Cos(ϕ): $f26	Tan(β)/2: $f27
-   #					θ2: $f28	ϕ: $f29		β: $f30		θ1: $f31
+   # Register Mapping:  L1: $f20,       L2: $f21,       Px: $f22,       Py: $f23,  
+   #                    D: $f24,        Cos(θ2): $f25,  Cos(ϕ): $f26    Tan(β)/2: $f27
+   #                    θ2: $f28        ϕ: $f29         β: $f30         θ1: $f31
    
    # Imprime cabeçalho
    li $v0, 4
@@ -95,10 +96,10 @@ main:
    
    # Calcula D
    # Define Argumentos para chamar a funcao calcula D
-   mov.s $f12, $f22		# Px em $f12
-   mov.s $f13, $f23		# Py em $f13
+   mov.s $f12, $f22             # Px em $f12
+   mov.s $f13, $f23             # Py em $f13
    jal calculaD
-   mov.s $f24, $f0		# Preserva resultado (D) em $f24
+   mov.s $f24, $f0              # Preserva resultado (D) em $f24
 
    # print float (valor de D)
    li $v0, 4
@@ -110,20 +111,20 @@ main:
    
    # Verifica D
    # Define Argumentos para chamar a funcao verifica D
-   mov.s $f12, $f20		# L1 em $f12
-   mov.s $f13, $f21		# L2 em $f13
-   mov.s $f14, $f24		# D em $f14
+   mov.s $f12, $f20             # L1 em $f12
+   mov.s $f13, $f21             # L2 em $f13
+   mov.s $f14, $f24             # D em $f14
    jal verificaD
 
    ##################################################
    # Calcula Cos(Teta2)
    # Argumentos para chamar a funcao calcCosTeta2
-   mov.s $f12, $f20		# L1 em $f12
-   mov.s $f13, $f21		# L2 em $f13
-   mov.s $f14, $f24		# D em $f14
+   mov.s $f12, $f20             # L1 em $f12
+   mov.s $f13, $f21             # L2 em $f13
+   mov.s $f14, $f24             # D em $f14
    
    jal calcCosTeta2
-   mov.s $f25, $f0		# Preserva resultado em $f25
+   mov.s $f25, $f0              # Preserva resultado em $f25
    
    # print msg8 (valor de Cos(Teta2))
    li $v0, 4
@@ -138,12 +139,12 @@ main:
    ##################################################
    # Calcula Cos(Phi)
    # Argumentos para chamar a funcao calcCosPhi
-   mov.s $f12, $f20		# L1 em $f12
-   mov.s $f13, $f21		# L2 em $f13
-   mov.s $f14, $f24		# D em $f14
+   mov.s $f12, $f20             # L1 em $f12
+   mov.s $f13, $f21             # L2 em $f13
+   mov.s $f14, $f24             # D em $f14
    
    jal calcCosPhi
-   mov.s $f26, $f0		# Preserva resultado em $f26
+   mov.s $f26, $f0              # Preserva resultado em $f26
    
    # print msg9 (valor de Cos(Phi))
    li $v0, 4
@@ -158,10 +159,10 @@ main:
    ##################################################
    # Calcula Phi
    # Argumentos para chamar a funcao acos(x)
-   mov.s $f12, $f26		# Cos(Phi) em $f12
+   mov.s $f12, $f26             # Cos(Phi) em $f12
    
    jal acos
-   mov.s $f29, $f0		# Preserva resultado em $f29
+   mov.s $f29, $f0              # Preserva resultado em $f29
    
    # print msg12 (valor de Phi)
    li $v0, 4
@@ -174,13 +175,13 @@ main:
    syscall  
    
    ##################################################
-   # Calcula tan (Beta)/2
+   # Calcula tangente(Beta/2)
    # Argumentos para chamar a funcao CalcTanBeta2
-   mov.s $f12, $f22		# Px em $f12
-   mov.s $f13, $f23		# Py em $f13
+   mov.s $f12, $f22             # Px em $f12
+   mov.s $f13, $f23             # Py em $f13
    
    jal calcTanBeta2
-   mov.s $f27, $f0		# Preserva resultado em $f27
+   mov.s $f27, $f0              # Preserva resultado em $f27
    
    # print msg10 (valor de Beta/2)
    li $v0, 4
@@ -195,11 +196,11 @@ main:
    ##################################################
    # Calcula Beta
    # Argumentos para chamar a funcao atan(x)
-   mov.s $f12, $f27		# Tan(Beta)/2 em $f12
+   mov.s $f12, $f27             # Tan(Beta/2) em $f12
    
    jal atan
    l.s $f4, fDois
-   mul.s $f30, $f0, $f4		# Beta/2 * 2; Preserva resultado em $f30
+   mul.s $f30, $f0, $f4         # Beta/2 * 2; Preserva resultado em $f30
    
    # print msg11 (valor de Beta)
    li $v0, 4
@@ -213,14 +214,14 @@ main:
    
    ##################################################
    # Calcula Teta1
-   add.s $f0, $f29, $f30	# Teta1 = Phi + Beta; Preserva resultado em $f31
+   add.s $f0, $f29, $f30         # Teta1 = Phi + Beta; Preserva resultado em $f31
    
    # Converte resultado de Rad para Deg
-   l.s $f4, pi			# PI em $f4
-   l.s $f5, fPIDeg		# 180 em $f5
-   div.s $f0, $f0, $f4		# div resultado por PI
-   mul.s $f0, $f0, $f5		# mult resultado por 180
-   mov.s $f31, $f0		# Preserva resultado em $f31
+   #l.s $f4, pi                 # PI em $f4
+   #l.s $f5, fPIDeg             # 180 em $f5
+   #div.s $f0, $f0, $f4         # div resultado por PI
+   #mul.s $f0, $f0, $f5         # mult resultado por 180
+   mov.s $f31, $f0              # Preserva resultado em $f31
    
    # print msg14 (valor de Teta1)
    li $v0, 4
@@ -235,15 +236,15 @@ main:
    ##################################################
    # Calcula Teta2
    # Argumentos para chamar a funcao acos(x)
-   mov.s $f12, $f25		# Cos(Teta2) em $f12
+   mov.s $f12, $f25             # Cos(Teta2) em $f12
    
    jal acos
    # Converte resultado de Rad para Deg
-   l.s $f4, pi			# PI em $f4
-   l.s $f5, fPIDeg		# 180 em $f5
-   div.s $f0, $f0, $f4		# div resultado por PI
-   mul.s $f0, $f0, $f5		# mult resultado por 180
-   mov.s $f28, $f0		# Preserva resultado em $f28
+   #l.s $f4, pi                 # PI em $f4
+   #l.s $f5, fPIDeg             # 180 em $f5
+   #div.s $f0, $f0, $f4         # div resultado por PI
+   #mul.s $f0, $f0, $f5         # mult resultado por 180
+   mov.s $f28, $f0              # Preserva resultado em $f28
    
    # print msg12 (valor de Teta2)
    li $v0, 4
@@ -260,36 +261,36 @@ Fim:
    syscall
 
 #############################################
-# Função: 	calculaD
-# Entradas: 	$f12: Px   $f13: Py
-# Saída:   	$f0: D = sqrt(Px^2 + Py^2)
-# Reg. Temp.:	$f4, $f5 e $f6
-# Preserva: 
+# Função        calculaD
+# Entradas:     $f12: Px   $f13: Py
+# Saída:        $f0: D = sqrt(Px^2 + Py^2)
+# Reg. Temp.:   $f4, $f5 e $f6
+# Preserva:     
 #############################################
 calculaD:
-   mul.s $f4, $f12, $f12	# f4: Px^2
-   mul.s $f5, $f13, $f13	# f5: Py^2
-   add.s $f6, $f4, $f5		# f6: (Px^2 + Py^2)
-   sqrt.s $f0, $f6		# f0 <-- sqrt(Px^2 + Py^2)
+   mul.s $f4, $f12, $f12        # f4: Px^2
+   mul.s $f5, $f13, $f13        # f5: Py^2
+   add.s $f6, $f4, $f5          # f6: (Px^2 + Py^2)
+   sqrt.s $f0, $f6              # f0 <-- sqrt(Px^2 + Py^2)
    jr $ra
    
 #############################################
-# Função: 	verificaD
-# Descrição:	Verifica se D > L1+L2 ou D < L1-L2
-#		Imprime msg, tooClose ou tooFar caso seja
-# Entradas: 	$f12: L1   $f13: L2   $f14: D
-# Saída:   	N/A
-# Reg. Temp.:	$f4, $f5
-# Preserva: 
+# Função:       verificaD
+# Descrição:    Verifica se D > L1+L2 ou D < L1-L2
+#               Imprime msg, tooClose ou tooFar caso seja
+# Entradas:     $f12: L1   $f13: L2   $f14: D
+# Saída:        N/A
+# Reg. Temp.:   $f4, $f5
+# Preserva:     
 #############################################
 verificaD:
    add.s $f4, $f12, $f13
-   c.le.s $f14, $f4		# if D > L1+L2  [ D <= (L1+L2) --> False ]
+   c.le.s $f14, $f4             # if D > L1+L2  [ D <= (L1+L2) --> False ]
    bc1f TargetTooFar
 
    sub.s $f5, $f12, $f13
    abs.s $f5, $f5
-   c.lt.s  $f14, $f5		# if D < L1+L2
+   c.lt.s  $f14, $f5            # if D < L1+L2
    
    #mov.s $f12, $f5
    #li $v0, 2
@@ -314,87 +315,89 @@ verificaD:
    j inicio
 
 ######################################################################
-# Função: 	calcCosTeta2
-# Descrição:	Calcula Cos(Teta2)
-# Entradas: 	$f12: L1   $f13: L2   $f14: D
-# Saída:   	$f0: Cos (Teta2) = ((D^2 - L1^2 - L2^2)/(2 * L1 * L2))
-# Reg. Temp.:	$f4, $f5, $f6, $f7, $f8, $f9
-# Preserva: 
+# Função:       calcCosTeta2
+# Descrição:    Calcula Cos(Teta2)
+# Entradas:     $f12: L1   $f13: L2   $f14: D
+# Saída:        $f0: Cos (Teta2) = ((D^2 - L1^2 - L2^2)/(2 * L1 * L2))
+# Reg. Temp.:   $f4, $f5, $f6, $f7, $f8, $f9
+# Preserva:     
 ######################################################################
 calcCosTeta2:
-   mul.s $f4, $f12, $f12	# $f4: L1^2
-   mul.s $f5, $f13, $f13	# $f5: L2^2
-   mul.s $f6, $f14, $f14	# $f6: D^2
+   mul.s $f4, $f12, $f12        # $f4: L1^2
+   mul.s $f5, $f13, $f13        # $f5: L2^2
+   mul.s $f6, $f14, $f14        # $f6: D^2
    
-   sub.s $f7, $f6, $f4		# $f7: D^2 - L1^2
-   sub.s $f7, $f7, $f5		# $f7: (D^2 - L1^2 - L2^2)
+   sub.s $f7, $f6, $f4          # $f7: D^2 - L1^2
+   sub.s $f7, $f7, $f5          # $f7: (D^2 - L1^2 - L2^2)
    
    l.s $f9, fDois
-   mul.s $f8, $f9, $f12 	# $f8: 2 * L1
-   mul.s $f8, $f8, $f13		# $f8: 2 * L1 * L2
+   mul.s $f8, $f9, $f12         # $f8: 2 * L1
+   mul.s $f8, $f8, $f13         # $f8: 2 * L1 * L2
    
-   div.s $f0, $f7, $f8		# $f0: Cos (Teta2) = ((D^2 - L1^2 - L2^2)/(2 * L1 * L2))
+   div.s $f0, $f7, $f8          # $f0: Cos (Teta2) = ((D^2 - L1^2 - L2^2)/(2 * L1 * L2))
    
    jr $ra
 
 ######################################################################
-# Função: 	calcCosPhi
-# Descrição:	Calcula Cos(Phi)
-# Entradas: 	$f12: L1   $f13: L2   $f14: D
-# Saída:   	$f0: Cos (Phi) = ((D^2 + L1^2 - L2^2) / (2 * D * L1))
-# Reg. Temp.:	$f4, $f5, $f6, $f7, $f8, $f9
-# Preserva: 
+# Função:       calcCosPhi
+# Descrição:    Calcula Cos(Phi)
+# Entradas:     $f12: L1   $f13: L2   $f14: D
+# Saída:        $f0: Cos (Phi) = ((D^2 + L1^2 - L2^2) / (2 * D * L1))
+# Reg. Temp.:   $f4, $f5, $f6, $f7, $f8, $f9
+# Preserva:     
 ######################################################################
 calcCosPhi:
-   mul.s $f4, $f12, $f12	# $f4: L1^2
-   mul.s $f5, $f13, $f13	# $f5: L2^2
-   mul.s $f6, $f14, $f14	# $f6: D^2
+   mul.s $f4, $f12, $f12        # $f4: L1^2
+   mul.s $f5, $f13, $f13        # $f5: L2^2
+   mul.s $f6, $f14, $f14        # $f6: D^2
    
-   add.s $f7, $f6, $f4		# $f7: D^2 + L1^2
-   sub.s $f7, $f7, $f5		# $f7: D^2 + L1^2 - L2^2
+   add.s $f7, $f6, $f4          # $f7: D^2 + L1^2
+   sub.s $f7, $f7, $f5          # $f7: D^2 + L1^2 - L2^2
    
    l.s $f9, fDois
-   mul.s $f8, $f9, $f14		# $f8: 2 * D
-   mul.s $f8, $f8, $f12		# $f8: 2 * D * L1
+   mul.s $f8, $f9, $f14         # $f8: 2 * D
+   mul.s $f8, $f8, $f12         # $f8: 2 * D * L1
    
-   div.s $f0, $f7, $f8		# $f0: Cos (Phi) ==> Retorno
+   div.s $f0, $f7, $f8          # $f0: Cos (Phi) ==> Retorno
    
    jr $ra
 
 ######################################################################
-# Função: 	calcTanBeta2
-# Descrição:	Calcula Tan(Beta) / 2
-# Entradas: 	$f12: Px   $f13: Py
-# Saída:   	$f0: Tan(Beta)/2 = ((sqrt(x^2 + y^2) - x) / y)		se x < 0 e y ≠ 0
-#				 = (y / (sqrt(x^2 + y^2) + x))		caso contrário
-# Reg. Temp.:	$f4, $f5, $f6, $f7, $f8
-# Preserva: 
+# Função:       calcTanBeta2
+# Descrição:    Calcula Tan(Beta / 2)
+# Entradas:     $f12: Px   $f13: Py
+# Saída:        $f0: Tan(Beta/2)  = ∞                                  se x < 0 e y = 0
+#                                 = ((sqrt(x^2 + y^2) - x) / y)         se x < 0 e y ≠ 0
+#                                 = (y / (sqrt(x^2 + y^2) + x))         se x >= 0
+# Reg. Temp.:   $f4, $f5, $f6, $f7, $f8
+# Preserva:     
 ######################################################################
 calcTanBeta2:
-   mul.s $f5, $f12, $f12	# $f5: x^2
-   mul.s $f6, $f13, $f13	# $f6: y^2
-   add.s $f7, $f5, $f6		# $f7: x^2 + y^2
-   sqrt.s $f7, $f7		# $f7: sqrt(x^2 + y^2)
+   mul.s $f5, $f12, $f12        # $f5: x^2
+   mul.s $f6, $f13, $f13        # $f6: y^2
+   add.s $f7, $f5, $f6          # $f7: x^2 + y^2
+   sqrt.s $f7, $f7              # $f7: sqrt(x^2 + y^2)
    
    l.s $f4, fZero
-   c.lt.s $f12, $f4		# if x < 0
-   bc1t verificaY		# verifica y
-   j numeradorY			# else, use a expressao com Y no numerador
+   c.lt.s $f12, $f4             # if x < 0
+   bc1t verificaY               # verifica y
+   j numeradorY                 # else, use a expressao com Y no numerador
    
    verificaY:
-   c.eq.s $f13, $f4		# if y ≠ 0
-   bc1f denominadorY		# use a expressao com Y no denominador
-   l.s $f0, fZero
+   c.eq.s $f13, $f4             # if y ≠ 0
+   bc1f denominadorY            # use a expressao com Y no denominador
+   lw $t0, infHex
+   mtc1 $t0, $f0                # if y = 0, retorna infinito
    jr $ra
    
    numeradorY:
-   add.s $f8, $f7, $f12		# $f8: sqrt(x^2 + y^2) + x 
-   div.s $f0, $f13, $f8		# $f0: Beta/2 = (y / (sqrt(x^2 + y^2) + x)) ==> Retorno
+   add.s $f8, $f7, $f12         # $f8: sqrt(x^2 + y^2) + x 
+   div.s $f0, $f13, $f8         # $f0: Beta/2 = (y / (sqrt(x^2 + y^2) + x)) ==> Retorno
    jr $ra
 
    denominadorY:
-   sub.s $f8, $f7, $f12		# $f8: sqrt(x^2 + y^2) - x 
-   div.s $f0, $f8, $f13		# $f0: Beta/2 = ((sqrt(x^2 + y^2) - x) / y) ==> Retorno
+   sub.s $f8, $f7, $f12         # $f8: sqrt(x^2 + y^2) - x 
+   div.s $f0, $f8, $f13         # $f0: Beta/2 = ((sqrt(x^2 + y^2) - x) / y) ==> Retorno
    jr $ra
    
 ######################################################################
@@ -410,6 +413,10 @@ atan:
 	# Zerando os registradores
 	mtc1 $0, $f0
 	mtc1 $0, $f1
+	abs.s $f13, $f12
+	l.s $f8, const_um # $f8 = 1.0
+	c.lt.s $f8, $f13 # Verifica se modulo de x e maior que 1
+	bc1t atanMaiores
 	add.s $f0, $f0, $f12 # $f0 = soma = x
 	add.s $f1, $f1, $f12 # $f1 = numerador = x
 	l.s $f2, const_um # $f2 = denominador = 1.0
@@ -431,6 +438,43 @@ loopAtan:
 	add.s $f0, $f0, $f6 # soma += novo termo
 	addi $t1, $t1, 1 # k++
 	j loopAtan
+atanMaiores:
+	# Inversão de x
+	div.s $f12, $f8, $f12 # $f12 = 1 / x
+	add.s $f0, $f0, $f12 # $f0 = soma = 1 / x
+	add.s $f1, $f1, $f12 # $f1 = numerador = 1 / x
+	l.s $f2, const_um # $f2 = denominador = 1.0
+	mul.s $f3, $f12, $f12
+	neg.s $f3, $f3 # $f3 = -(1/x)^2
+	l.s $f4, const_dois # $f4 = 2.0
+	l.s $f8, const_um # $f8 = 1.0
+	l.s $f5, criterio_erro # $f5 = 1.0e-7
+	la $t0, k_max
+	lw $t0, ($t0) # $t0 = 50
+	xor $t1, $t1, $t1 # $t0 = k = 0
+loopAtanMaiores:
+	mul.s $f1, $f1, $f3 # Somando as potencias no numerador
+	add.s $f2, $f2, $f4 # denominador += 2
+	div.s $f6, $f1, $f2 # $f6 = novo termo = numerador / denominador
+	abs.s $f7, $f6
+	c.lt.s $f7, $f5 # Verifica se novo termo atingiu criterio de aproximacao
+	bc1t atanMaioresFinal
+	beq $t0, $t1, atanMaioresFinal # Verifica se k chegou no limite
+	add.s $f0, $f0, $f6 # soma += novo termo
+	addi $t1, $t1, 1 # k++
+	j loopAtanMaiores
+atanMaioresFinal:
+	l.s $f9, pi # $f9 = pi
+	div.s $f9, $f9, $f4 # $f9 = pi / 2
+	mtc1 $zero, $f10 # $f10 = 0
+	c.lt.s 1, $f12, $f10 # Verifica se (1/x) e menor que 0, pois o sinal na inversao se mantem
+	bc1t 1, atanMaioresNegativoFinal
+	sub.s $f0, $f9, $f0 # $f0 = (pi / 2) - atan(1 / x)
+	j fimFunction
+atanMaioresNegativoFinal:
+	neg.s $f9, $f9 # $f9 = - (pi / 2)
+	sub.s $f0, $f9, $f0 # $f0 = -(pi / 2) - atan(1 / x)
+	j fimFunction
 
 ######################################################################
 # Função: 	asen
@@ -444,6 +488,7 @@ asen:
 	mtc1 $0, $f1
 	# Verificacao de dominio
 	l.s $f5, const_um # $f5 = 1.0
+	abs.s $f13, $f12
 	c.le.s $f12, $f5
 	bc1f fimFunction
 	neg.s $f18, $f5
@@ -481,6 +526,7 @@ loopAsen:
 # Entradas: 	$f12: x
 # Saída:   	$f0: acos(x)
 ######################################################################
+# Recebe $f12 = x e retorna $f0 = acos(x)
 acos:
 	# Manipulando a Stack Frame
 	addiu $sp, $sp, -4
@@ -504,3 +550,8 @@ acos:
 
 fimFunction:
 	jr $ra
+
+fim:
+	li $v0, 10
+	syscall
+	
