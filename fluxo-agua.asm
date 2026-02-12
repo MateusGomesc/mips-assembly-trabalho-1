@@ -10,7 +10,7 @@
 
 .data
 
-
+# --- Definição de Matrizes e Vetores ---
 .align 2
 B:
     .word -1,-1,0,0,0,0,0
@@ -24,7 +24,7 @@ F:
     .float 100.0, 50.0, 80.0, 80.0, 30.0, 20.0, 10.0
 
 
-
+# --- Strings de Saída ---
 fonte:       .asciiz "Fonte"
 sumidouro:   .asciiz "Sumidouro/Acumulador"
 equilibrio:  .asciiz "Passagem/Equilibrio"
@@ -38,8 +38,8 @@ main:
     li $t7, 5          # linhas
     li $t2, 7          # colunas
 
-    la $s2, B
-    la $s3, F
+    la $s2, B      # s2 = endereço base da matriz B
+    la $s3, F      # s3 = endereço base do vetor F
 
 loop_externo:   #anda com as linhas
     bge $s1, $t7, fim
@@ -47,13 +47,13 @@ loop_externo:   #anda com as linhas
     mtc1 $zero, $f4
     li $t0, 0
 
-loop_interno:
+loop_interno:    # Calcula o somatório: Σ(B[i][j] * F[j])
     bge $t0, $t2, fim_linha
 
-    # endereço B[i][j]
-    mul $t1, $s1, $t2
+    # endereço B[i][j] base + (i * colunas + j) * 4
+    mul $t1, $s1, $t2   
     add $t1, $t1, $t0
-    sll $t1, $t1, 2
+    sll $t1, $t1, 2  # t1 = t1 * 4 (offset em bytes)
     add $t1, $s2, $t1
     lw  $t3, 0($t1)
 
@@ -63,8 +63,8 @@ loop_interno:
     l.s $f2, 0($t4)
 
     # Bij * Fj
-    mtc1 $t3, $f6
-    cvt.s.w $f6, $f6
+    mtc1 $t3, $f6   # Move B[i][j] para o coprocessador 1
+    cvt.s.w $f6, $f6  # Converte B[i][j] de inteiro para float
     mul.s $f6, $f6, $f2
     add.s $f4, $f4, $f6
 
