@@ -9,7 +9,6 @@
 
 .data 
 	
-	# dados referentes ao primeiro fragmento do programa
 	intro:.asciiz "Os fragmentos serão executados.\n"
 	base:.asciiz "Digite a base (inteiro maior ou igual à zero): "
 	expoente:.asciiz "Digite o expoente (inteiro maior ou igual à zero): "
